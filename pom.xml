@@ -37,7 +37,7 @@
 						<index>true</index>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.pvsq.Scratch</mainClass>
+							<mainClass>org.pvsq.AoC24</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
