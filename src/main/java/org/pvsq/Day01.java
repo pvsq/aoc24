@@ -1,15 +1,18 @@
 package org.pvsq;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 class Day01 {
-	public static int PartOne(String inputPathString) {
-		List<Integer> leftList = new ArrayList<Integer>();
-		List<Integer> rightList = new ArrayList<Integer>();
+	private List<Integer> leftList = new ArrayList<Integer>();
+	private List<Integer> rightList = new ArrayList<Integer>();
+
+	public int partOne(String inputPathString) {
 		int length = 0;
 		int distance = 0;
 
@@ -27,10 +30,38 @@ class Day01 {
 		rightList.sort(Integer::compare);
 
 		length = leftList.size();
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length; ++i) {
 			distance += Math.abs(leftList.get(i) - rightList.get(i));
 		}
 
 		return distance;
+	}
+
+	public int partTwo() {
+		Map<Integer, Integer> duplicatesScore = new HashMap<Integer, Integer>();
+		int similarity = 0;
+
+		int length = leftList.size();
+		for (int i = 0; i < length; ++i) {
+			int current = leftList.get(i);
+			if (duplicatesScore.containsKey(current)) {
+				similarity += duplicatesScore.get(current);
+				continue;
+			}
+
+			int multiplier = 0;
+			for (int j = 0; j < length; ++j) {
+				// the lists are sorted at this point
+				if (rightList.get(j) > current)
+					break;
+
+				if (rightList.get(j) == current)
+					multiplier += 1;
+			}
+			duplicatesScore.put(current, current * multiplier);
+			similarity += current * multiplier;
+		}
+
+		return similarity;
 	}
 }
