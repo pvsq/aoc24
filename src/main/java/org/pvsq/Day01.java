@@ -11,8 +11,22 @@ import java.util.HashMap;
 class Day01 {
 	private List<Integer> leftList = new ArrayList<Integer>();
 	private List<Integer> rightList = new ArrayList<Integer>();
+	private final String inputPathString;
 
-	public int partOne(String inputPathString) {
+	public static void answers(String inputPathString) {
+		Day01 day01 = new Day01(inputPathString);
+		System.out.println("Day 1 Answers");
+		System.out.println("===============");
+		System.out.println("Part 1 - " + day01.partOne());
+		System.out.println("Part 2 - " + day01.partTwo());
+		System.out.println("===============");
+	}
+
+	private Day01(String inputPathString) {
+		this.inputPathString = inputPathString;
+	}
+
+	private int partOne() {
 		int length = 0;
 		int distance = 0;
 
@@ -37,7 +51,7 @@ class Day01 {
 		return distance;
 	}
 
-	public int partTwo() {
+	private int partTwo() {
 		Map<Integer, Integer> duplicatesScore = new HashMap<Integer, Integer>();
 		int similarity = 0;
 
