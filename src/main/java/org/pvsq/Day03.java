@@ -7,7 +7,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class Day03 {
-	private final String inputPathString;
+	private String inputData;
+	private final Pattern mulPattern = Pattern.compile(
+			"mul\\(([0-9]+),([0-9]+)\\)|do\\(\\)|don't\\(\\)");
+	private Matcher mulMatcher;
 
 	public static void answers(String inputPathString) {
 		Day03 day03 = new Day03(inputPathString);
@@ -19,28 +22,50 @@ class Day03 {
 	}
 
 	private Day03(String inputPathString) {
-		this.inputPathString = inputPathString;
+		try {
+			inputData = new String(
+					Files.readAllBytes(Paths.get(inputPathString)));
+		} catch (IOException e) {
+			System.err.format("IOException: %s%n", e);
+		}
 	}
 
 	private int partOne() {
 		int mulSum = 0;
-		try {
-			String input = new String(
-					Files.readAllBytes(Paths.get(inputPathString)));
-			Pattern mulPattern = Pattern.compile("mul\\(([0-9]+),([0-9]+)\\)");
-			Matcher mulMatcher = mulPattern.matcher(input);
-			while (mulMatcher.find()) {
-				mulSum += Integer.parseInt(mulMatcher.group(1))
-						* Integer.parseInt(mulMatcher.group(2));
-			}
-
-		} catch (IOException e) {
-			System.err.format("IOException: %s%n", e);
+		mulMatcher = mulPattern.matcher(inputData);
+		while (mulMatcher.find()) {
+			// System.out.println(mulMatcher.group(0));
+			String firstOp = mulMatcher.group(1);
+			String secondOp = mulMatcher.group(2);
+			if ((firstOp != null) && (secondOp != null))
+				mulSum += Integer.parseInt(firstOp) * Integer.parseInt(secondOp);
 		}
 		return mulSum;
 	}
 
 	private int partTwo() {
-		return 0;
+		int mulSum = 0;
+		boolean disabled = false;
+		mulMatcher = mulMatcher.reset();
+
+		while (mulMatcher.find()) {
+			String instruction = mulMatcher.group(0);
+
+			if (instruction != null && !instruction.startsWith("mul")) {
+				if (instruction.equalsIgnoreCase("don't()") && !disabled)
+					disabled = true;
+				if (instruction.equalsIgnoreCase("do()") && disabled)
+					disabled = false;
+				continue;
+			}
+
+			if (!disabled) {
+				int firstOp = Integer.parseInt(mulMatcher.group(1));
+				int secondOp = Integer.parseInt(mulMatcher.group(2));
+				mulSum += firstOp * secondOp;
+			}
+		}
+
+		return mulSum;
 	}
 }
