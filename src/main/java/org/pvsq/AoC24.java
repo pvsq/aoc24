@@ -20,6 +20,9 @@ class AoC24 {
 			case 2:
 				Day02.answers(args[1]);
 				break;
+			case 3:
+				Day03.answers(args[1]);
+				break;
 			default:
 				System.out.println("Day input must be between 1 and 25, inclusive.");
 				break;
