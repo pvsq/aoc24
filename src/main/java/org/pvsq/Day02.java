@@ -2,13 +2,16 @@ package org.pvsq;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 class Day02 {
 	private final String inputPathString;
+	private int numSafeReports = 0;
+	private Map<int[], Integer> unsafeReportsMap = new HashMap<int[], Integer>();
 
 	public static void answers(String inputPathString) {
 		Day02 day02 = new Day02(inputPathString);
@@ -24,59 +27,68 @@ class Day02 {
 	}
 
 	private int partOne() {
-		int numSafeReports = 0;
-
 		try (Scanner scanner = new Scanner(Paths.get(inputPathString))) {
 			while (scanner.hasNextLine()) {
 				int[] levels = Stream.of(scanner.nextLine().split(" "))
 						.mapToInt(Integer::parseInt)
 						.toArray();
 
-				boolean isSafe = true;
-				int deltaSum = 0;
-				for (int i = 0; i < levels.length - 1; ++i) {
-					if (!isSafe)
-						break;
-
-					if (Math.abs(levels[i] - levels[i + 1]) > 3)
-						isSafe = false;
-
-					if (i == 0) { // first comparison
-						deltaSum = levels[i + 1] - levels[i];
-						if (deltaSum == 0)
-							isSafe = false;
-						continue;
-					}
-
-					int delta = levels[i + 1] - levels[i];
-					if (delta == 0)
-						isSafe = false;
-					if (deltaSum > 0) { // previously increasing
-						if ((deltaSum + delta) < deltaSum) // decreasing
-							isSafe = false;
-					} else { // previously decreasing
-						if ((deltaSum + delta) > deltaSum) // increasing
-							isSafe = false;
-					}
-					deltaSum += delta;
-				}
-
-				// System.out.print(isSafe ? "Safe: " : "Unsafe: ");
-				// System.out.println(Arrays.stream(levels)
-				// .mapToObj(String::valueOf)
-				// .collect(Collectors.joining(" ")));
-
-				if (isSafe) {
+				int unsafeLevelIdx = getUnsafeIndex(levels);
+				if (unsafeLevelIdx == -1) {
 					numSafeReports += 1;
+				} else {
+					unsafeReportsMap.put(levels, unsafeLevelIdx);
 				}
 			}
 		} catch (IOException e) {
 			System.err.format("IOException: %s%n", e);
 		}
+
 		return numSafeReports;
 	}
 
 	private int partTwo() {
-		return 0;
+		for (Map.Entry<int[], Integer> reportIdxMap : unsafeReportsMap.entrySet()) {
+			int unsafeIdx = reportIdxMap.getValue();
+			int[] levels = reportIdxMap.getKey();
+
+			for (int i = unsafeIdx - 1; i <= unsafeIdx + 1; ++i) {
+				int currentUnsafeIdx = i;
+				int[] unsafeRemovedReport = IntStream.range(0, levels.length)
+						.filter(j -> j != currentUnsafeIdx)
+						.map(j -> levels[j])
+						.toArray();
+
+				if (getUnsafeIndex(unsafeRemovedReport) == -1) {
+					numSafeReports += 1;
+					break;
+				}
+			}
+		}
+
+		return numSafeReports;
+	}
+
+	private int getUnsafeIndex(int[] levels) {
+		int deltaSum = 0;
+
+		for (int i = 0; i < levels.length - 1; ++i) {
+			if (Math.abs(levels[i] - levels[i + 1]) > 3)
+				return i;
+
+			int delta = levels[i + 1] - levels[i];
+			if (delta == 0)
+				return i;
+			if (deltaSum > 0) {
+				if ((deltaSum + delta) < deltaSum)
+					return i;
+			} else if (deltaSum < 0) {
+				if ((deltaSum + delta) > deltaSum)
+					return i;
+			}
+			deltaSum += levels[i + 1] - levels[i];
+		}
+
+		return -1; // safe
 	}
 }
