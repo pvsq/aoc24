@@ -13,6 +13,7 @@ class Day04 {
 	private final String SAMX = "SAMX";
 	private String xmasMatrix;
 	private int xmasCount = 0;
+	private int crossMasCount = 0;
 
 	public static void answers(String inputPathString) {
 		Day04 day04 = new Day04(inputPathString);
@@ -85,7 +86,39 @@ class Day04 {
 	}
 
 	private int partTwo() {
-		return 0;
+		// skip some elements at the end of the matrix so that extracting a
+		// 'cross-MAS' is still possible without overflow
+		for (int i = 0; i < (MAXLEN - 2 * DIM - 3); ++i) {
+			int startLeftIdx = i;
+			int midIdx = i + DIM + 1;
+			int startRightIdx = i + 2;
+			// mid index in a 6x6 matrix can be up to the second-last element
+			// in a row in xmasMatrix
+			if (midIdx % DIM <= DIM - 2) {
+				if (xmasMatrix.charAt(midIdx) == 'A') {
+					String crossMasL2R = IntStream
+							.iterate(startLeftIdx, n -> n + DIM + 1).limit(3)
+							.mapToObj(k -> String.valueOf(xmasMatrix.charAt(k)))
+							.collect(Collectors.joining());
+					String crossMasR2L = IntStream
+							.iterate(startRightIdx, m -> m + DIM - 1).limit(3)
+							.mapToObj(l -> String.valueOf(xmasMatrix.charAt(l)))
+							.collect(Collectors.joining());
+
+					crossMasCount += crossMasL2R.equalsIgnoreCase("MAS")
+							|| crossMasL2R.equalsIgnoreCase("SAM")
+									? (crossMasR2L.equalsIgnoreCase("MAS")
+											|| crossMasR2L.equalsIgnoreCase("SAM")
+													? 1
+													: 0)
+									: 0;
+				}
+			}
+			if ((i + 2) % DIM == DIM - 1) {
+				i += 2;
+			}
+		}
+		return crossMasCount;
 	}
 
 	private int countOfXmas(String line) {
